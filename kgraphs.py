@@ -12,6 +12,7 @@ import pandas as pd
 import networkx as nx
 import matplotlib.pyplot as plt
 
+@st.cache
 def create_knowledge_graph(df, source_col, target_col, relation_col):
     G = nx.Graph()
 
@@ -22,15 +23,16 @@ def create_knowledge_graph(df, source_col, target_col, relation_col):
 
     return G
 
+@st.cache
 def draw_knowledge_graph(G, node_size, edge_width):
-    pos = nx.circular_layout(G)  # Using a circular layout for simplicity
+    pos = nx.shell_layout(G)  # Using shell layout for simplicity
     edge_labels = nx.get_edge_attributes(G, 'relation')
 
     fig, ax = plt.subplots()
     nx.draw(G, pos, with_labels=True, node_size=node_size, node_color='skyblue', font_size=8, font_color='black', font_weight='bold', width=edge_width)
     nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels)
 
-    st.pyplot(fig)
+    return fig
 
 def main():
     st.title("Dynamic Knowledge Graph App")
@@ -54,11 +56,26 @@ def main():
         st.subheader("Knowledge Graph Visualization:")
 
         # Sliders for customization
-        node_size = st.slider("Node Size", min_value=1, max_value=100, value=20)
-        edge_width = st.slider("Edge Width", min_value=0.1, max_value=5.0, value=1.0, step=0.1)
+        node_size = st.slider("Node Size", min_value=1, max_value=100, value=20, key='node_size')
+        edge_width = st.slider("Edge Width", min_value=0.1, max_value=5.0, value=1.0, step=0.1, key='edge_width')
 
-        draw_knowledge_graph(knowledge_graph, node_size, edge_width)
+        # Display the graph only when sliders have changed
+        if st.session_state.node_size_changed or st.session_state.edge_width_changed:
+            fig = draw_knowledge_graph(knowledge_graph, node_size, edge_width)
+            st.pyplot(fig)
+
+            # Reset the session state flags
+            st.session_state.node_size_changed = False
+            st.session_state.edge_width_changed = False
+
+        # Update the session state flags when sliders change
+        if st.session_state.node_size != node_size:
+            st.session_state.node_size_changed = True
+            st.session_state.node_size = node_size
+
+        if st.session_state.edge_width != edge_width:
+            st.session_state.edge_width_changed = True
+            st.session_state.edge_width = edge_width
 
 if __name__ == "__main__":
     main()
-
