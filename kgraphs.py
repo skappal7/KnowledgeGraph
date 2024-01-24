@@ -15,8 +15,8 @@ def create_knowledge_graph(df, source_col, target_col, relation_col):
     G = nx.Graph()
 
     for _, row in df.iterrows():
-        G.add_node(row[source_col])
-        G.add_node(row[target_col])
+        G.add_node(row[source_col], **row.to_dict())
+        G.add_node(row[target_col], **row.to_dict())
         G.add_edge(row[source_col], row[target_col], relation=row[relation_col])
 
     return G
@@ -62,7 +62,7 @@ def main():
 
         # Display node and edge details in a table
         st.subheader("Node Details:")
-        node_details = pd.DataFrame(list(knowledge_graph.nodes(data=True)), columns=['Node', 'Attributes'])
+        node_details = pd.DataFrame([{**data, 'Node': node} for node, data in knowledge_graph.nodes(data=True)])
         st.write(node_details.set_index('Node'))
 
         st.subheader("Edge Details:")
