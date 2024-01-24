@@ -12,6 +12,12 @@ import pandas as pd
 import networkx as nx
 import matplotlib.pyplot as plt
 
+# Initialize session state variables
+st.session_state.node_size_changed = False
+st.session_state.edge_width_changed = False
+st.session_state.node_size = 20  # Initial value
+st.session_state.edge_width = 1.0  # Initial value
+
 @st.cache
 def create_knowledge_graph(df, source_col, target_col, relation_col):
     G = nx.Graph()
@@ -25,7 +31,7 @@ def create_knowledge_graph(df, source_col, target_col, relation_col):
 
 @st.cache
 def draw_knowledge_graph(G, node_size, edge_width):
-    pos = nx.shell_layout(G)  # Using shell layout for simplicity
+    pos = nx.circular_layout(G)  # Using circular layout for simplicity
     edge_labels = nx.get_edge_attributes(G, 'relation')
 
     fig, ax = plt.subplots()
@@ -56,8 +62,8 @@ def main():
         st.subheader("Knowledge Graph Visualization:")
 
         # Sliders for customization
-        node_size = st.slider("Node Size", min_value=1, max_value=100, value=20, key='node_size')
-        edge_width = st.slider("Edge Width", min_value=0.1, max_value=5.0, value=1.0, step=0.1, key='edge_width')
+        node_size = st.slider("Node Size", min_value=1, max_value=100, value=st.session_state.node_size, key='node_size')
+        edge_width = st.slider("Edge Width", min_value=0.1, max_value=5.0, value=st.session_state.edge_width, step=0.1, key='edge_width')
 
         # Display the graph only when sliders have changed
         if st.session_state.node_size_changed or st.session_state.edge_width_changed:
@@ -79,3 +85,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
