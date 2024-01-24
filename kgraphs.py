@@ -23,7 +23,7 @@ def create_knowledge_graph(df, source_col, target_col, relation_col):
     return G
 
 def draw_knowledge_graph(G, node_size, edge_width):
-    pos = nx.spring_layout(G)
+    pos = nx.circular_layout(G)  # Using a circular layout for simplicity
     edge_labels = nx.get_edge_attributes(G, 'relation')
 
     nx.draw(G, pos, with_labels=True, node_size=node_size, node_color='skyblue', font_size=8, font_color='black', font_weight='bold', width=edge_width)
