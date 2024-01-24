@@ -26,10 +26,11 @@ def draw_knowledge_graph(G, node_size, edge_width):
     pos = nx.circular_layout(G)  # Using a circular layout for simplicity
     edge_labels = nx.get_edge_attributes(G, 'relation')
 
+    fig, ax = plt.subplots()
     nx.draw(G, pos, with_labels=True, node_size=node_size, node_color='skyblue', font_size=8, font_color='black', font_weight='bold', width=edge_width)
     nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels)
 
-    st.pyplot()
+    st.pyplot(fig)
 
 def main():
     st.title("Dynamic Knowledge Graph App")
@@ -60,3 +61,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
