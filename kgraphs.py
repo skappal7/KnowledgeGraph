@@ -8,50 +8,23 @@ Original file is located at
 """
 import streamlit as st
 import pandas as pd
-import networkx as nx
+import kglab
 import matplotlib.pyplot as plt
-import ampligraph as ampli
-from ampligraph.latent_features import TransE
-from ampligraph.evaluation import train_test_split_no_unseen
-
-# Set the backend (use 'tf' for TensorFlow or 'torch' for PyTorch)
-ampli.init()
+import networkx as nx
 
 def create_knowledge_graph(df, source_col, target_col, relation_col):
-    G = nx.Graph()
+    G = kglab.KnowledgeGraph()
 
     for _, row in df.iterrows():
-        G.add_node(row[source_col], label=row[source_col])
-        G.add_node(row[target_col], label=row[target_col])
-        G.add_edge(row[source_col], row[target_col], relation=row[relation_col])
+        G.add_edge(row[source_col], row[relation_col], row[target_col])
 
     return G
 
-def train_embeddings(df, model, epochs=100):
-    X = df[['Source', 'Target', 'Relation']].values
-    X_train, X_test = train_test_split_no_unseen(X, test_size=0.1)
-    
-    model.fit(X_train, epochs=epochs)
-
-    return model
-
-def get_node_embeddings(model, nodes):
-    embeddings = model.get_embeddings(nodes, embedding_type='entity')
-    return embeddings
-
-def draw_knowledge_graph(G, node_size, edge_width, node_embeddings=None):
-    pos = nx.circular_layout(G)  # Using a circular layout for simplicity
-    edge_labels = nx.get_edge_attributes(G, 'relation')
+def draw_knowledge_graph(G, node_size, edge_width):
+    pos = nx.spring_layout(G)
 
     fig, ax = plt.subplots()
     nx.draw(G, pos, with_labels=True, node_size=node_size, node_color='skyblue', font_size=8, font_color='black', font_weight='bold', width=edge_width)
-    nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels)
-
-    if node_embeddings is not None:
-        for node, (x, y) in pos.items():
-            emb = node_embeddings.get(node)
-            if emb is not None:
-                ax.text(x, y + 0.05, f'{emb[0]:.2f}, {emb[1]:.2f}', fontsize=8, ha='center')
 
     st.pyplot(fig)
 
@@ -76,19 +49,11 @@ def main():
 
         st.subheader("Knowledge Graph Visualization:")
 
-        # Train embeddings using AmpliGraph
-        model = TransE(batches_count=10, epochs=100, k=20, eta=2, loss='pairwise', verbose=True)
-        trained_model = train_embeddings(df, model)
-
         # Sliders for customization
         node_size = st.slider("Node Size", min_value=1, max_value=100, value=20)
         edge_width = st.slider("Edge Width", min_value=0.1, max_value=5.0, value=1.0, step=0.1)
 
-        # Get embeddings for nodes
-        nodes = df['Source'].append(df['Target']).unique()
-        node_embeddings = get_node_embeddings(trained_model, nodes)
-
-        draw_knowledge_graph(knowledge_graph, node_size, edge_width, node_embeddings)
+        draw_knowledge_graph(knowledge_graph.to_networkx(), node_size, edge_width)
 
 if __name__ == "__main__":
     main()
