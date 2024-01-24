@@ -8,23 +8,26 @@ Original file is located at
 """
 import streamlit as st
 import pandas as pd
-import kglab
-import matplotlib.pyplot as plt
 import networkx as nx
+import matplotlib.pyplot as plt
 
 def create_knowledge_graph(df, source_col, target_col, relation_col):
-    G = kglab.KnowledgeGraph()
+    G = nx.Graph()
 
     for _, row in df.iterrows():
-        G.add_edge(row[source_col], row[relation_col], row[target_col])
+        G.add_node(row[source_col], **row.to_dict())
+        G.add_node(row[target_col], **row.to_dict())
+        G.add_edge(row[source_col], row[target_col], relation=row[relation_col])
 
     return G
 
 def draw_knowledge_graph(G, node_size, edge_width):
-    pos = nx.spring_layout(G)
+    pos = nx.circular_layout(G)  # Using a circular layout for simplicity
+    edge_labels = nx.get_edge_attributes(G, 'relation')
 
     fig, ax = plt.subplots()
     nx.draw(G, pos, with_labels=True, node_size=node_size, node_color='skyblue', font_size=8, font_color='black', font_weight='bold', width=edge_width)
+    nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels)
 
     st.pyplot(fig)
 
@@ -53,7 +56,19 @@ def main():
         node_size = st.slider("Node Size", min_value=1, max_value=100, value=20)
         edge_width = st.slider("Edge Width", min_value=0.1, max_value=5.0, value=1.0, step=0.1)
 
-        draw_knowledge_graph(knowledge_graph.to_networkx(), node_size, edge_width)
+        draw_knowledge_graph(knowledge_graph, node_size, edge_width)
+
+        st.subheader("Knowledge Graph Details:")
+
+        # Display node and edge details in a table
+        st.subheader("Node Details:")
+        node_details = pd.DataFrame([{**data, 'Node': node} for node, data in knowledge_graph.nodes(data=True)])
+        node_details_style = node_details.set_index('Node').style.applymap(lambda x: 'background-color: green' if x == 'Y' else ('background-color: red' if x == 'N' else ''))
+        st.write(node_details_style)
+
+        st.subheader("Edge Details:")
+        edge_details = pd.DataFrame(list(knowledge_graph.edges(data=True)), columns=['Source', 'Target', 'Attributes'])
+        st.write(edge_details.set_index(['Source', 'Target']))
 
 if __name__ == "__main__":
     main()
