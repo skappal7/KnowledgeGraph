@@ -22,8 +22,8 @@ def create_knowledge_graph(df, source_col, target_col, relation_col):
 
     return G
 
-def draw_knowledge_graph(G, node_size, gravity, edge_width):
-    pos = nx.spring_layout(G, k=gravity)
+def draw_knowledge_graph(G, node_size, edge_width):
+    pos = nx.spring_layout(G)
     edge_labels = nx.get_edge_attributes(G, 'relation')
 
     nx.draw(G, pos, with_labels=True, node_size=node_size, node_color='skyblue', font_size=8, font_color='black', font_weight='bold', width=edge_width)
@@ -54,10 +54,9 @@ def main():
 
         # Sliders for customization
         node_size = st.slider("Node Size", min_value=1, max_value=100, value=20)
-        gravity = st.slider("Gravity", min_value=0.1, max_value=1.0, value=0.1, step=0.1)
         edge_width = st.slider("Edge Width", min_value=0.1, max_value=5.0, value=1.0, step=0.1)
 
-        draw_knowledge_graph(knowledge_graph, node_size, gravity, edge_width)
+        draw_knowledge_graph(knowledge_graph, node_size, edge_width)
 
 if __name__ == "__main__":
     main()
