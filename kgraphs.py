@@ -58,5 +58,16 @@ def main():
 
         draw_knowledge_graph(knowledge_graph, node_size, edge_width)
 
+        st.subheader("Knowledge Graph Details:")
+
+        # Display node and edge details in a table
+        st.subheader("Node Details:")
+        node_details = pd.DataFrame(list(knowledge_graph.nodes(data=True)), columns=['Node', 'Attributes'])
+        st.write(node_details)
+
+        st.subheader("Edge Details:")
+        edge_details = pd.DataFrame(list(knowledge_graph.edges(data=True)), columns=['Source', 'Target', 'Attributes'])
+        st.write(edge_details)
+
 if __name__ == "__main__":
     main()
