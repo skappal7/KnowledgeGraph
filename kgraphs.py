@@ -63,4 +63,12 @@ def main():
         # Display node and edge details in a table
         st.subheader("Node Details:")
         node_details = pd.DataFrame([{**data, 'Node': node} for node, data in knowledge_graph.nodes(data=True)])
-        node_details_style = node_details.style.applymap(lambda x:
+        node_details_style = node_details.style.applymap(lambda x: 'background-color: green' if x == 'Y' else ('background-color: red' if x == 'N' else ''))
+        st.write(node_details_style.set_index('Node'))
+
+        st.subheader("Edge Details:")
+        edge_details = pd.DataFrame(list(knowledge_graph.edges(data=True)), columns=['Source', 'Target', 'Attributes'])
+        st.write(edge_details.set_index(['Source', 'Target']))
+
+if __name__ == "__main__":
+    main()
