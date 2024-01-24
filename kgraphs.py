@@ -63,11 +63,11 @@ def main():
         # Display node and edge details in a table
         st.subheader("Node Details:")
         node_details = pd.DataFrame(list(knowledge_graph.nodes(data=True)), columns=['Node', 'Attributes'])
-        st.write(node_details)
+        st.write(node_details.set_index('Node'))
 
         st.subheader("Edge Details:")
         edge_details = pd.DataFrame(list(knowledge_graph.edges(data=True)), columns=['Source', 'Target', 'Attributes'])
-        st.write(edge_details)
+        st.write(edge_details.set_index(['Source', 'Target']))
 
 if __name__ == "__main__":
     main()
